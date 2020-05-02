@@ -30,7 +30,9 @@ end
 def git_diff
   require 'rugged'
 
-  repo = Rugged::Repository.new(@options[:repo])
+  repo = Rugged::Repository.discover(@options[:repo])
+  @options[:repo] = Pathname.new(repo.workdir)
+
   base_commit = repo.rev_parse(@options[:base])
   tip_commit = repo.rev_parse(@options[:tip])
 
