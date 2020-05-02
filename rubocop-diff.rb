@@ -38,7 +38,7 @@ def git_diff
   diff.find_similar!
 end
 
-def get_changes(diff)
+def lines_changed_by_file(diff)
   require 'set'
 
   diff.patches.map do |patch|
@@ -91,7 +91,7 @@ end
 
 def main
   parse_args
-  exit print_offenses(get_changes(git_diff))
+  exit print_offenses(lines_changed_by_file(git_diff))
 end
 
 main
