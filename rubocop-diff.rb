@@ -5,6 +5,7 @@ require 'pathname'
 
 @options = {
   base: 'master',
+  merge_base: nil,
   repo: Pathname.new('.'),
   tip: 'HEAD'
 }
@@ -15,6 +16,10 @@ def parse_args
   OptionParser.new do |opts|
     opts.on('-bBASE', '--base=BASE') do |base|
       @options[:base] = base
+    end
+
+    opts.on('-mMERGE_BASE', '--merge-base=MERGE_BASE') do |merge_base|
+      @options[:merge_base] = merge_base
     end
 
     opts.on('-rREPOSITORY', '--repository=REPOSITORY') do |repo|
@@ -33,8 +38,16 @@ def git_diff
   repo = Rugged::Repository.discover(@options[:repo])
   @options[:repo] = Pathname.new(repo.workdir)
 
-  base_commit = repo.rev_parse(@options[:base])
   tip_commit = repo.rev_parse(@options[:tip])
+
+  base_ref = if @options[:merge_base]
+               base = repo.rev_parse(@options[:merge_base])
+               repo.merge_base(base, tip_commit)
+             else
+               @options[:base]
+             end
+
+  base_commit = repo.rev_parse(base_ref)
 
   diff = base_commit.diff(tip_commit)
 
