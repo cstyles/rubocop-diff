@@ -91,10 +91,7 @@ end
 
 def main
   parse_args
-  diff = git_diff
-  changes = get_changes(diff)
-  exit_code = print_offenses(changes)
-  exit exit_code
+  exit print_offenses(get_changes(git_diff))
 end
 
 main
