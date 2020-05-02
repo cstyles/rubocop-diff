@@ -3,7 +3,8 @@
 
 @options = {
   base: 'master',
-  repo: Pathname.new('.')
+  repo: Pathname.new('.'),
+  tip: 'HEAD'
 }
 
 def parse_args
@@ -17,6 +18,10 @@ def parse_args
     opts.on('-rREPOSITORY', '--repository=REPOSITORY') do |repo|
       @options[:repo] = Pathname.new(repo)
     end
+
+    opts.on('-tTIP', '--tip=TIP') do |tip|
+      @options[:tip] = tip
+    end
   end.parse!
 end
 
@@ -25,7 +30,7 @@ def git_diff
 
   repo = Rugged::Repository.new(@options[:repo])
   base_commit = repo.rev_parse(@options[:base])
-  tip_commit = repo.head.target
+  tip_commit = repo.rev_parse(@options[:tip])
 
   diff = base_commit.diff(tip_commit)
 
