@@ -71,6 +71,7 @@ def setup_rubocop
 end
 
 def print_offenses(changes)
+  exit_code = 0
   runner, formatter = setup_rubocop
 
   formatter.started(changes.keys)
@@ -80,16 +81,20 @@ def print_offenses(changes)
     offenses = runner.file_offenses(path)
     offenses = offenses.filter { |offense| lines.include? offense.location.line }
     formatter.file_finished(path, offenses)
+    exit_code = 1 unless offenses.empty?
   end
 
   formatter.finished(changes.keys)
+
+  exit_code
 end
 
 def main
   parse_args
   diff = git_diff
   changes = get_changes(diff)
-  print_offenses(changes)
+  exit_code = print_offenses(changes)
+  exit exit_code
 end
 
 main
