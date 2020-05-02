@@ -1,0 +1,11 @@
+AllCops:
+  NewCops: disable
+
+Metrics/AbcSize:
+  Max: 20
+
+Layout/LineLength:
+  Max: 100
+
+Metrics/MethodLength:
+  Max: 50
