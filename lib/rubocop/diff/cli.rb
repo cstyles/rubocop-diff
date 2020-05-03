@@ -30,9 +30,6 @@ module RuboCop
       def print_offenses
         success = true
         changes = filter_changes(lines_changed_per_file)
-        runner = create_runner
-        formatter = create_formatter
-
         formatter.started(changes.keys)
 
         changes.each do |path, lines|
@@ -77,18 +74,17 @@ module RuboCop
       end
 
       def filter_changes(changes)
-        target_finder = create_target_finder
         changes.reject { |path, _lines| target_finder.process_explicit_path(path).empty? }
       end
 
       def tip_commit
-        @repo.rev_parse(@options[:tip])
+        @tip_commit ||= @repo.rev_parse(@options[:tip])
       end
 
-      def create_runner
+      def runner
         require 'rubocop'
 
-        runner = RuboCop::Runner.new({}, create_config_store)
+        runner = RuboCop::Runner.new({}, config_store)
 
         class << runner
           public :file_offenses
@@ -97,29 +93,30 @@ module RuboCop
         runner
       end
 
-      def create_formatter
+      def formatter
         require 'rubocop'
 
-        RuboCop::Formatter::ProgressFormatter.new($stdout)
+        @formatter ||= RuboCop::Formatter::ProgressFormatter.new($stdout)
       end
 
-      def create_target_finder
+      def target_finder
         require 'rubocop'
 
-        options = { force_exclusion: true }
-        RuboCop::TargetFinder.new(create_config_store, options)
+        RuboCop::TargetFinder.new(config_store, { force_exclusion: true })
       end
 
-      def create_config_store
-        config_store = RuboCop::ConfigStore.new
-        config_file_name = workdir / '.rubocop.yml'
-        config_store.options_config = config_file_name.to_s
+      def config_store
+        @config_store ||= begin
+                            config_store = RuboCop::ConfigStore.new
+                            config_file_name = workdir / '.rubocop.yml'
+                            config_store.options_config = config_file_name.to_s
 
-        config_store
+                            config_store
+                          end
       end
 
       def workdir
-        Pathname.new(@repo.workdir)
+        @workdir ||= Pathname.new(@repo.workdir)
       end
 
       def parse_args(**options)
