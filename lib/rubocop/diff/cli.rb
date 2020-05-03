@@ -14,6 +14,7 @@ module RuboCop
       def initialize(**options)
         @options = Args.parse(**options)
         @repo = Rugged::Repository.discover(@options[:repo])
+        @workdir = Pathname.new(@repo.workdir)
       end
 
       def run
@@ -49,7 +50,7 @@ module RuboCop
 
           next if lines.empty?
 
-          [(workdir / path).to_s, Set.new(lines)]
+          [(@workdir / path).to_s, Set.new(lines)]
         end.compact.to_h
       end
 
@@ -103,15 +104,11 @@ module RuboCop
       def config_store
         @config_store ||= begin
                             config_store = RuboCop::ConfigStore.new
-                            config_file_name = workdir / '.rubocop.yml'
+                            config_file_name = @workdir / '.rubocop.yml'
                             config_store.options_config = config_file_name.to_s
 
                             config_store
                           end
-      end
-
-      def workdir
-        @workdir ||= Pathname.new(@repo.workdir)
       end
     end
   end
