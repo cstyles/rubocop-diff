@@ -25,6 +25,16 @@ module RuboCop
       def setup_git
         @repo = Rugged::Repository.discover(@options[:repo])
         @workdir = Pathname.new(@repo.workdir)
+        @tip_commit = @repo.rev_parse(@options[:tip])
+
+        base_ref = if @options[:merge_base]
+                     base = @repo.rev_parse(@options[:merge_base])
+                     @repo.merge_base(base, @tip_commit)
+                   else
+                     @options[:base]
+                   end
+
+        @base_commit = @repo.rev_parse(base_ref)
       end
 
       def print_offenses
@@ -59,26 +69,11 @@ module RuboCop
       end
 
       def git_diff
-        base_commit.diff(tip_commit).find_similar!
-      end
-
-      def base_commit
-        base_ref = if @options[:merge_base]
-                     base = @repo.rev_parse(@options[:merge_base])
-                     @repo.merge_base(base, tip_commit)
-                   else
-                     @options[:base]
-                   end
-
-        @repo.rev_parse(base_ref)
+        @base_commit.diff(@tip_commit).find_similar!
       end
 
       def filter_changes(changes)
         changes.reject { |path, _lines| target_finder.process_explicit_path(path).empty? }
-      end
-
-      def tip_commit
-        @tip_commit ||= @repo.rev_parse(@options[:tip])
       end
 
       def runner
