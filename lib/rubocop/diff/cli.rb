@@ -29,14 +29,13 @@ module RuboCop
 
       def print_offenses
         success = true
-        changes = lines_changed_per_file
+        changes = filter_changes(lines_changed_per_file)
         runner = create_runner
         formatter = create_formatter
 
         formatter.started(changes.keys)
 
         changes.each do |path, lines|
-          path = path.to_s
           offenses = runner.file_offenses(path)
           offenses = offenses.filter { |offense| lines.include? offense.location.line }
           formatter.file_finished(path, offenses)
@@ -51,7 +50,6 @@ module RuboCop
       def lines_changed_per_file
         git_diff.patches.map do |patch|
           path = patch.delta.new_file[:path]
-          next unless path.end_with? '.rb' # TODO: will skip ruby files that don't end in `.rb`
 
           lines = patch.hunks.map do |hunk|
             hunk.lines.filter(&:addition?).map(&:new_lineno)
@@ -59,7 +57,7 @@ module RuboCop
 
           next if lines.empty?
 
-          [workdir / path, Set.new(lines)]
+          [(workdir / path).to_s, Set.new(lines)]
         end.compact.to_h
       end
 
@@ -78,6 +76,11 @@ module RuboCop
         @repo.rev_parse(base_ref)
       end
 
+      def filter_changes(changes)
+        target_finder = create_target_finder
+        changes.filter { |path, _lines| target_finder.ruby_file? path }
+      end
+
       def tip_commit
         @repo.rev_parse(@options[:tip])
       end
@@ -85,9 +88,7 @@ module RuboCop
       def create_runner
         require 'rubocop'
 
-        config_store = RuboCop::ConfigStore.new
-        config_store.options_config = workdir / '.rubocop.yml'
-        runner = RuboCop::Runner.new({}, config_store)
+        runner = RuboCop::Runner.new({}, create_config_store)
 
         class << runner
           public :file_offenses
@@ -100,6 +101,20 @@ module RuboCop
         require 'rubocop'
 
         RuboCop::Formatter::ProgressFormatter.new($stdout)
+      end
+
+      def create_target_finder
+        require 'rubocop'
+
+        RuboCop::TargetFinder.new(create_config_store, {})
+      end
+
+      def create_config_store
+        config_store = RuboCop::ConfigStore.new
+        config_file_name = workdir / '.rubocop.yml'
+        config_store.options_config = config_file_name.to_s
+
+        config_store
       end
 
       def workdir
