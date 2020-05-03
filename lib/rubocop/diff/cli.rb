@@ -13,15 +13,19 @@ module RuboCop
     class CLI
       def initialize(**options)
         @options = Args.parse(**options)
-        @repo = Rugged::Repository.discover(@options[:repo])
-        @workdir = Pathname.new(@repo.workdir)
       end
 
       def run
+        setup_git
         print_offenses
       end
 
       private
+
+      def setup_git
+        @repo = Rugged::Repository.discover(@options[:repo])
+        @workdir = Pathname.new(@repo.workdir)
+      end
 
       def print_offenses
         success = true
