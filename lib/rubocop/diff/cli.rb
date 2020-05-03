@@ -78,8 +78,7 @@ module RuboCop
 
       def filter_changes(changes)
         target_finder = create_target_finder
-        target_files = Set.new(target_finder.find(changes.keys))
-        changes.filter { |path, _lines| target_files.include? path }
+        changes.reject { |path, _lines| target_finder.process_explicit_path(path).empty? }
       end
 
       def tip_commit
