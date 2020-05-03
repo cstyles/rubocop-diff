@@ -78,7 +78,8 @@ module RuboCop
 
       def filter_changes(changes)
         target_finder = create_target_finder
-        changes.filter { |path, _lines| target_finder.ruby_file? path }
+        target_files = Set.new(target_finder.find(changes.keys))
+        changes.filter { |path, _lines| target_files.include? path }
       end
 
       def tip_commit
@@ -106,7 +107,8 @@ module RuboCop
       def create_target_finder
         require 'rubocop'
 
-        RuboCop::TargetFinder.new(create_config_store, {})
+        options = { force_exclusion: true }
+        RuboCop::TargetFinder.new(create_config_store, options)
       end
 
       def create_config_store
