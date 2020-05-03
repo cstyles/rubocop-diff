@@ -5,19 +5,14 @@ require 'pathname'
 require 'rugged'
 require 'set'
 
+require_relative './args'
+
 module RuboCop
   module Diff
     # A class to execute the program when launched via the command line
     class CLI
-      DEFAULT_OPTIONS = {
-        base: 'master',
-        merge_base: nil,
-        repo: Pathname.new('.'),
-        tip: 'HEAD'
-      }.freeze
-
       def initialize(**options)
-        parse_args(**options)
+        @options = Args.parse(**options)
         @repo = Rugged::Repository.discover(@options[:repo])
       end
 
@@ -117,28 +112,6 @@ module RuboCop
 
       def workdir
         @workdir ||= Pathname.new(@repo.workdir)
-      end
-
-      def parse_args(**options)
-        @options = DEFAULT_OPTIONS.merge(options)
-
-        OptionParser.new do |opts|
-          opts.on('-bBASE', '--base=BASE') do |base|
-            @options[:base] = base
-          end
-
-          opts.on('-mMERGE_BASE', '--merge-base=MERGE_BASE') do |merge_base|
-            @options[:merge_base] = merge_base
-          end
-
-          opts.on('-rREPOSITORY', '--repository=REPOSITORY') do |repo|
-            @options[:repo] = Pathname.new(repo)
-          end
-
-          opts.on('-tTIP', '--tip=TIP') do |tip|
-            @options[:tip] = tip
-          end
-        end.parse!
       end
     end
   end
