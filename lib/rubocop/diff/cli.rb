@@ -73,7 +73,12 @@ module RuboCop
       end
 
       def filter_changes(changes)
-        changes.reject { |path, _lines| target_finder.process_explicit_path(path).empty? }
+        require 'rubocop/version'
+
+        mode = []
+        mode << :only_recognized_file_types if RuboCop::Version::STRING >= '0.83.0'
+
+        changes.reject { |path, _lines| target_finder.process_explicit_path(path, *mode).empty? }
       end
 
       def runner
