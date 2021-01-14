@@ -106,13 +106,14 @@ module RuboCop
       end
 
       def config_store
-        @config_store ||= begin
-                            config_store = RuboCop::ConfigStore.new
-                            config_file_name = @workdir / '.rubocop.yml'
-                            config_store.options_config = config_file_name.to_s
+        @config_store ||=
+          begin
+            config_store = RuboCop::ConfigStore.new
+            config_file_name = @workdir / '.rubocop.yml'
+            config_store.options_config = config_file_name.to_s
 
-                            config_store
-                          end
+            config_store
+          end
       end
     end
   end
