@@ -1,5 +1,6 @@
 AllCops:
   NewCops: disable
+  TargetRubyVersion: 2.4
 
 Metrics/AbcSize:
   Max: 20
