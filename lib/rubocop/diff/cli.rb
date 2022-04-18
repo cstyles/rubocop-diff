@@ -82,15 +82,17 @@ module RuboCop
       end
 
       def runner
-        require 'rubocop'
+        @runner ||=
+          begin
+            require 'rubocop'
+            runner = RuboCop::Runner.new({}, config_store)
 
-        runner = RuboCop::Runner.new({}, config_store)
+            class << runner
+              public :file_offenses
+            end
 
-        class << runner
-          public :file_offenses
-        end
-
-        runner
+            runner
+          end
       end
 
       def formatter
