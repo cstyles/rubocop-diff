@@ -72,10 +72,12 @@ module RuboCop
         @base_commit.diff(@tip_commit).find_similar!
       end
 
+      # Filters changed files down to files that should actually be linted.
+      # This will remove non-Ruby files and ensure we respect RuboCop's
+      # `Include` and `Exclude` options.
       def filter_changes(changes)
-        changes.reject do |path, _lines|
-          target_finder.process_explicit_path(path, :only_recognized_file_types).empty?
-        end
+        included_files = target_finder.find changes.keys, :only_recognized_file_types
+        changes.filter { |path, _lines| included_files.include? path }
       end
 
       def runner
