@@ -6,11 +6,11 @@ Gem::Specification.new do |spec|
   spec.name          = 'rubocop-diff'
   spec.version       = RuboCop::Diff::VERSION
   spec.authors       = ['Collin Styles']
-  spec.email         = ['collingstyles@mycase.com']
+  spec.email         = ['collingstyles@gmail.com']
 
   spec.summary       = 'Run rubocop only on the parts of files modified by your git branch.'
   spec.description   = spec.summary
-  spec.homepage      = 'https://github.com/mycase/rubocop-diff'
+  spec.homepage      = 'https://github.com/cstyles/rubocop-diff'
   spec.files         = `git ls-files bin lib`.split("\n")
 
   spec.required_ruby_version = Gem::Requirement.new('>= 3.0.0')
