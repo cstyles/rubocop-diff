@@ -5,7 +5,7 @@ module RuboCop
     # A class to handle command line arguments
     class Args
       DEFAULT_OPTIONS = {
-        base: 'master',
+        base: 'main',
         merge_base: nil,
         repo: Pathname.new('.'),
         tip: 'HEAD'
