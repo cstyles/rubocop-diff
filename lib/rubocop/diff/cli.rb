@@ -99,7 +99,7 @@ module RuboCop
       end
 
       def target_finder
-        RuboCop::TargetFinder.new(config_store, { force_exclusion: true })
+        @target_finder ||= RuboCop::TargetFinder.new(config_store, { force_exclusion: true })
       end
 
       def config_store
