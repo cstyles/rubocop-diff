@@ -2,6 +2,7 @@
 
 require 'optparse'
 require 'pathname'
+require 'rubocop'
 require 'rugged'
 require 'set'
 
@@ -83,7 +84,6 @@ module RuboCop
       def runner
         @runner ||=
           begin
-            require 'rubocop'
             runner = RuboCop::Runner.new({}, config_store)
 
             class << runner
@@ -95,14 +95,10 @@ module RuboCop
       end
 
       def formatter
-        require 'rubocop'
-
         @formatter ||= RuboCop::Formatter::ProgressFormatter.new($stdout)
       end
 
       def target_finder
-        require 'rubocop'
-
         RuboCop::TargetFinder.new(config_store, { force_exclusion: true })
       end
 
